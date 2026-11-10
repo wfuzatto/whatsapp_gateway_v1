@@ -1,0 +1,20 @@
+# Configurações e segredos locais
+.env
+.env.*
+!.env.example
+app/config.local.php
+app/config.php
+config.local.php
+config.php
+whatsapp_install_key.txt
+*install_key*.txt
+*.pem
+*.key
+*.p12
+*.pfx
+# Cache, logs e temporários
+*.log
+*.tmp
+storage/logs/*
+storage/cache/*
+!.gitkeep

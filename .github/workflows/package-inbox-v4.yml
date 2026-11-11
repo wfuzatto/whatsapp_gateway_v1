@@ -1,0 +1,31 @@
+name: Empacotar hotfix da Inbox V1
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/package-inbox-v4.yml'
+      - 'assets/css/inbox-scroll.css'
+      - 'assets/js/inbox-scroll.js'
+      - 'docs/CORRECAO_ROLAGEM_INBOX_V1.md'
+  workflow_dispatch:
+jobs:
+  zip:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Empacotar CSS, JS e instrucoes
+        shell: bash
+        run: |
+          mkdir -p dist/assets/css dist/assets/js
+          cp assets/css/inbox-scroll.css dist/assets/css/
+          cp assets/js/inbox-scroll.js dist/assets/js/
+          cp docs/CORRECAO_ROLAGEM_INBOX_V1.md dist/LEIA_PARA_INSTALAR.md
+          cd dist && zip -qr ../whatsapp_gateway_v1_scroll_v4.zip .
+      - name: Disponibilizar ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: whatsapp_gateway_v1_scroll_v4
+          path: whatsapp_gateway_v1_scroll_v4.zip
+          if-no-files-found: error

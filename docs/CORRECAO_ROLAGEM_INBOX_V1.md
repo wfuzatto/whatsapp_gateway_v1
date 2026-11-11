@@ -1,44 +1,48 @@
-# Correção de rolagem da Central de Conversas — V1 (revisão 2)
+# Hotfix V1 — Tela fixa, rolagem no histórico e Ajuda/Sair no cabeçalho (v3)
 
-O problema anterior era: **a rolagem aparecia na página inteira**, deixando o histórico e a caixa de digitação saírem da área útil.
+## Motivação
 
-Agora a tela `?r=inbox` ocupa a altura da janela, e **apenas o histórico de mensagens e a lista de conversas** têm barras de rolagem independentes.
+O upload dos arquivos CSS/JS por si só não ativa o JavaScript: a V1 usa `app/views/layout.php` como template global. A CSS anterior não limitava toda a cadeia de altura do painel.
 
-## Arquivos atualizados no GitHub
+## Instalação segura no servidor
 
-- `assets/css/inbox-scroll.css`
-- `assets/js/inbox-scroll.js`
-
-**Importante:** a hospedagem de produção tem outras alterações que ainda não estão inteiramente no repositório da V1. Portanto, não substitua o `app.css`, `app.js`, `inbox.php` ou `layout.php` por versões antigas.
-
-## Atualização no servidor
-
-1. Faça backup dos dois arquivos atuais em `assets/css/` e `assets/js/`.
-2. Baixe os dois arquivos novos do repositório e envie ao mesmo caminho:
+1. Faça backup do `app/views/layout.php` da hospedagem atual.
+2. Atualize pelo FTP estes **dois** arquivos, sem trocar `app.css` ou `app.js`:
    - `assets/css/inbox-scroll.css`
    - `assets/js/inbox-scroll.js`
-3. No arquivo **`app/views/pages/inbox.php` existente no servidor**, mantenha **somente uma** inclusão do script. Atualize a querystring para forçar versão nova:
+3. Dentro do **layout.php atual do servidor**, adicione **depois** de `<script defer src="assets/js/app.js"></script>`:
 
 ```html
-<script defer src="assets/js/inbox-scroll.js?v=20261111-2"></script>
+<script defer src="assets/js/inbox-scroll.js?v=20261111-3"></script>
 ```
 
-4. Abra `https://prodatastelecom.com.br/sites/whatsapp_gateway/?r=inbox` e pressione **Ctrl+F5**.
+Se já existir inclusão do mesmo arquivo, atualize a querystring para `20261111-3`. Não substitua o layout por um arquivo antigo. O script é idempotente, mesmo que uma cópia antiga também esteja incluída em `app/views/pages/inbox.php`; é preferível remover a inclusão antiga dali.
 
-O JS injeta automaticamente o CSS versão `20261111-2` quando a área de chat existe.
+4. Na Central de Conversas, pressione Ctrl+F5.
 
-## Critérios de teste
+## Resultado esperado
 
-- Nenhuma barra de rolagem vertical na página inteira da Central de Conversas.
-- A lista de contatos continua rolando separadamente.
-- A área direita, no `#message-stream`, tem barra de rolagem própria.
-- Cabeçalho do contato, aviso de 24 horas e caixa de digitação permanecem visíveis.
-- A conversa abre na última mensagem, inclusive quando há imagens/áudios carregados.
-- Se o usuário rolar para cima para ler histórico, novas mídias não o trazem de volta para baixo; a seta ↓ permite retornar.
-- Nenhuma alteração em Webhooks, Graph API, banco de dados ou V2.
+- `/?r=inbox` ocupa toda a janela. **A página principal não rola.**
+- `#message-stream` tem rolagem vertical própria à direita. A lista de contatos rola à esquerda, separadamente.
+- Cabeçalho e campo de digitação permanecem visíveis.
+- Ao selecionar o chat, o histórico vai para a última mensagem. Enquanto o atendente lê mensagens antigas, não força o scroll: aparece uma seta ↓ para voltar ao fim.
+- **Ajuda** e **Sair** aparecem à direita dos botões de navegação no header, em todas as páginas que carregam o layout global, usando as mesmas URLs já existentes no menu lateral.
 
-## Verificação local
+## Verificação no Console (F12)
 
-Teste estrutural com o CSS original disponível, Chromium headless e 55 mensagens, em resoluções 1440×900, 720×900 e 1440×540: altura do documento igual à janela e `scrollHeight > clientHeight` apenas no histórico.
+```js
+({
+  script: !!window.__ponteV1UiV3,
+  paginaFixa: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+  historicoRolavel: document.querySelector('#message-stream')?.scrollHeight - document.querySelector('#message-stream')?.clientHeight,
+  botoes: [...document.querySelectorAll('.topbar [data-ponte-header-action]')].map(x=>x.textContent.trim())
+})
+```
 
-**A atualização ainda precisa ser publicada no FTP para alterar o site real.** 
+Esperado na inbox: `script: true`, `paginaFixa: 0`, `historicoRolavel > 0`, `botoes: ['Ajuda','Sair']`. Se `script:false`, reveja o layout.php e o cache.
+
+## Cuidados
+
+O GitHub da V1 **não contém o código-fonte PHP completo da versão atual em produção**. Por isso, não publicamos `layout.php` integralmente nem substituímos a versão de produção. Apenas assets de correção e instruções. Não altera V2, Graph API, banco ou webhook.
+
+Validado em Chromium com fixture derivado do HTML/CSS da V1, 75 mensagens e quatro resoluções. Necessita publicação no FTP para validar a instalação real.

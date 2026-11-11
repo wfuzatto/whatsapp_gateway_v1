@@ -1,34 +1,44 @@
-# Correção de rolagem — Central de Conversas (V1)
+# Correção de rolagem da Central de Conversas — V1 (revisão 2)
 
-Arquivos já adicionados neste repositório:
+O problema anterior era: **a rolagem aparecia na página inteira**, deixando o histórico e a caixa de digitação saírem da área útil.
+
+Agora a tela `?r=inbox` ocupa a altura da janela, e **apenas o histórico de mensagens e a lista de conversas** têm barras de rolagem independentes.
+
+## Arquivos atualizados no GitHub
+
 - `assets/css/inbox-scroll.css`
 - `assets/js/inbox-scroll.js`
 
-## Instalação na hospedagem
+**Importante:** a hospedagem de produção tem outras alterações que ainda não estão inteiramente no repositório da V1. Portanto, não substitua o `app.css`, `app.js`, `inbox.php` ou `layout.php` por versões antigas.
 
-A hospedagem tem alterações mais recentes que o repositório base. **Não substitua o layout inteiro.**
+## Atualização no servidor
 
-1. Faça backup de `app/views/pages/inbox.php` no servidor.
-2. Envie os dois arquivos acima para as pastas correspondentes em `prodatastelecom.com.br/sites/whatsapp_gateway`.
-3. Acrescente ao **final do arquivo `app/views/pages/inbox.php` já existente**:
+1. Faça backup dos dois arquivos atuais em `assets/css/` e `assets/js/`.
+2. Baixe os dois arquivos novos do repositório e envie ao mesmo caminho:
+   - `assets/css/inbox-scroll.css`
+   - `assets/js/inbox-scroll.js`
+3. No arquivo **`app/views/pages/inbox.php` existente no servidor**, mantenha **somente uma** inclusão do script. Atualize a querystring para forçar versão nova:
 
 ```html
-<script defer src="assets/js/inbox-scroll.js?v=20261111-1"></script>
+<script defer src="assets/js/inbox-scroll.js?v=20261111-2"></script>
 ```
 
-4. Entre em `https://prodatastelecom.com.br/sites/whatsapp_gateway/?r=inbox` e pressione **Ctrl+F5**.
+4. Abra `https://prodatastelecom.com.br/sites/whatsapp_gateway/?r=inbox` e pressione **Ctrl+F5**.
 
-## Como funciona
+O JS injeta automaticamente o CSS versão `20261111-2` quando a área de chat existe.
 
-- A lista de mensagens fica com rolagem vertical independente, sem ultrapassar a altura do painel.
-- Ao selecionar a conversa, o painel vai para a mensagem mais recente.
-- Mesmo com imagens ou áudios carregados depois, mantém a última mensagem visível.
-- Se o atendente subir para ler histórico, o chat não o puxa enquanto ele estiver lendo; aparece um botão ↓ para ir ao final.
-- A atualização automática a cada 12 segundos já existente no `app.js` é preservada.
-- Não altera banco, autenticação, webhook, Android, arquivos atuais do servidor nem a V2.
+## Critérios de teste
 
-## Cuidados
+- Nenhuma barra de rolagem vertical na página inteira da Central de Conversas.
+- A lista de contatos continua rolando separadamente.
+- A área direita, no `#message-stream`, tem barra de rolagem própria.
+- Cabeçalho do contato, aviso de 24 horas e caixa de digitação permanecem visíveis.
+- A conversa abre na última mensagem, inclusive quando há imagens/áudios carregados.
+- Se o usuário rolar para cima para ler histórico, novas mídias não o trazem de volta para baixo; a seta ↓ permite retornar.
+- Nenhuma alteração em Webhooks, Graph API, banco de dados ou V2.
 
-Não substitua o `inbox.php`, `app.css`, `app.js` ou `bootstrap.php` inteiros por arquivos antigos. Este patch foi feito como **adição isolada** para evitar regressões da V1 em produção.
+## Verificação local
 
-Teste primeiro em uma cópia/ambiente de homologação caso seu sistema tenha customizações de layout.
+Teste estrutural com o CSS original disponível, Chromium headless e 55 mensagens, em resoluções 1440×900, 720×900 e 1440×540: altura do documento igual à janela e `scrollHeight > clientHeight` apenas no histórico.
+
+**A atualização ainda precisa ser publicada no FTP para alterar o site real.** 

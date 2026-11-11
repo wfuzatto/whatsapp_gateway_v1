@@ -1,140 +1,31 @@
-/* WhatsApp Gateway V1 — rolagem SOMENTE na area das mensagens.
-   Aplicado exclusivamente em /?r=inbox quando inbox-scroll.js detecta o chat.
-   Corrige: scroll da pagina inteira e mensagem final encoberta. */
-html.ponte-inbox-scroll,
-html.ponte-inbox-scroll body {
-  height: 100%;
-  overflow: hidden !important;
-}
-
-html.ponte-inbox-scroll .app-shell {
-  height: 100vh;
-  height: 100dvh;
-  min-height: 0;
-  overflow: hidden;
-}
-html.ponte-inbox-scroll .sidebar {
-  height: 100%;
-  min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
-html.ponte-inbox-scroll .main {
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
-}
-html.ponte-inbox-scroll .topbar,
-html.ponte-inbox-scroll .footer {
-  flex: 0 0 auto;
-}
-html.ponte-inbox-scroll .content {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-html.ponte-inbox-scroll .content > .page-heading,
-html.ponte-inbox-scroll .content > .notice {
-  flex: 0 0 auto;
-}
-html.ponte-inbox-scroll .inbox-layout {
-  display: grid;
-  flex: 1 1 auto;
-  height: auto !important;
-  max-height: none !important;
-  min-height: 0 !important;
-  min-width: 0;
-  grid-template-rows: minmax(0, 1fr);
-  overflow: hidden;
-}
-html.ponte-inbox-scroll .inbox-layout > .inbox-list,
-html.ponte-inbox-scroll .inbox-layout > .chat-pane {
-  min-height: 0;
-  min-width: 0;
-  max-height: 100%;
-  overflow: hidden;
-}
-html.ponte-inbox-scroll .inbox-list {
-  display: flex;
-  flex-direction: column;
-}
-html.ponte-inbox-scroll .inbox-list > .inbox-list-head,
-html.ponte-inbox-scroll .inbox-list > .search-box,
-html.ponte-inbox-scroll .inbox-list > .inbox-tabs {
-  flex: 0 0 auto;
-}
-html.ponte-inbox-scroll .conversation-items {
-  min-height: 0;
-  flex: 1 1 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-}
-html.ponte-inbox-scroll .chat-pane {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-html.ponte-inbox-scroll .chat-head,
-html.ponte-inbox-scroll .window-alert,
-html.ponte-inbox-scroll .composer,
-html.ponte-inbox-scroll .composer-hint,
-html.ponte-inbox-scroll .template-composer {
-  flex: 0 0 auto;
-}
-html.ponte-inbox-scroll #message-stream {
-  display: flex;
-  flex-direction: column;
-  flex: 1 1 0px;
-  height: 0;
-  max-height: none;
-  min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
-  overscroll-behavior-y: contain;
-  scrollbar-width: thin;
-  scrollbar-color: #86b5a0 #edf3ef;
-  -webkit-overflow-scrolling: touch;
-}
-/* Elementos da conversa nao podem encolher para caber na altura fixa. */
-html.ponte-inbox-scroll #message-stream > .message-row {
-  flex: 0 0 auto;
-}
-html.ponte-inbox-scroll #message-stream::-webkit-scrollbar {
-  width: 10px;
-}
-html.ponte-inbox-scroll #message-stream::-webkit-scrollbar-track {
-  background: #edf3ef;
-}
-html.ponte-inbox-scroll #message-stream::-webkit-scrollbar-thumb {
-  background: #91bba6;
-  border: 2px solid #edf3ef;
-  border-radius: 10px;
-}
-html.ponte-inbox-scroll #message-stream::-webkit-scrollbar-thumb:hover {
-  background: #5b9879;
-}
-html.ponte-inbox-scroll .jump-to-latest {
-  position: absolute;
-  right: 22px;
-  bottom: 83px;
-  z-index: 5;
-  width: 38px;
-  height: 38px;
-  display: grid;
-  place-items: center;
-  border: 1px solid #badac8;
-  border-radius: 50%;
-  color: #14714c;
-  background: #fff;
-  font-size: 21px;
-  box-shadow: 0 5px 13px rgba(10, 55, 31, .14);
-}
-html.ponte-inbox-scroll .jump-to-latest[hidden] { display: none !important; }
-html.ponte-inbox-scroll .jump-to-latest:hover { background: #e7f5ef; }
-@media (max-width: 760px) {
-  html.ponte-inbox-scroll .inbox-layout { min-height: 0 !important; }
-  html.ponte-inbox-scroll .jump-to-latest { right: 12px; bottom: 78px; }
-}
+/* WhatsApp Gateway V1 — v3. Apenas a inbox fica sem rolagem da pagina. */
+html.ponte-inbox-v3,html.ponte-inbox-v3 body{height:100%;width:100%;margin:0;overflow:hidden!important;overscroll-behavior:none}
+html.ponte-inbox-v3 .app-shell{position:fixed!important;inset:0!important;height:100vh!important;height:100dvh!important;min-height:0!important;width:100%;display:flex;overflow:hidden!important}
+html.ponte-inbox-v3 .sidebar{height:100%;min-height:0!important;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain}
+html.ponte-inbox-v3 .main{height:100%;min-height:0!important;min-width:0;flex:1 1 0;display:flex;flex-direction:column;overflow:hidden!important}
+html.ponte-inbox-v3 .topbar{flex:0 0 auto;min-height:55px}
+html.ponte-inbox-v3 .footer{flex:0 0 auto}
+html.ponte-inbox-v3 .content{box-sizing:border-box;flex:1 1 0!important;display:flex!important;flex-direction:column;width:min(1470px,100%);min-height:0!important;max-height:100%;overflow:hidden!important}
+html.ponte-inbox-v3 .content>:not(.inbox-layout){flex-shrink:0}
+html.ponte-inbox-v3 .inbox-layout{box-sizing:border-box;flex:1 1 0!important;height:auto!important;min-height:0!important;max-height:none!important;min-width:0;display:grid;grid-template-rows:minmax(0,1fr);overflow:hidden!important}
+html.ponte-inbox-v3 .inbox-layout>.inbox-list,html.ponte-inbox-v3 .inbox-layout>.chat-pane{height:100%;min-height:0!important;min-width:0;max-height:100%;overflow:hidden!important}
+html.ponte-inbox-v3 .inbox-list,html.ponte-inbox-v3 .chat-pane{display:flex;flex-direction:column}
+html.ponte-inbox-v3 .inbox-list-head,html.ponte-inbox-v3 .search-box,html.ponte-inbox-v3 .inbox-tabs,html.ponte-inbox-v3 .chat-head,html.ponte-inbox-v3 .window-alert,html.ponte-inbox-v3 .composer,html.ponte-inbox-v3 .composer-hint,html.ponte-inbox-v3 .template-composer{flex:0 0 auto}
+html.ponte-inbox-v3 .conversation-items{flex:1 1 0!important;height:0;min-height:0!important;overflow-x:hidden;overflow-y:auto!important;overscroll-behavior-y:contain}
+html.ponte-inbox-v3 #message-stream{display:flex!important;flex-direction:column;flex:1 1 0!important;height:0!important;min-height:0!important;max-height:none!important;overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#83af97 #e9f2ed;-webkit-overflow-scrolling:touch}
+html.ponte-inbox-v3 #message-stream>*{flex:0 0 auto!important}
+html.ponte-inbox-v3 #message-stream::-webkit-scrollbar,html.ponte-inbox-v3 .conversation-items::-webkit-scrollbar{width:10px}
+html.ponte-inbox-v3 #message-stream::-webkit-scrollbar-thumb,html.ponte-inbox-v3 .conversation-items::-webkit-scrollbar-thumb{background:#90b9a6;border:2px solid #e9f2ed;border-radius:10px}
+html.ponte-inbox-v3 .chat-pane{position:relative}
+html.ponte-inbox-v3 .jump-to-latest{position:absolute;right:22px;bottom:82px;z-index:5;width:40px;height:40px;border:1px solid #c5e1d1;border-radius:50%;background:#fff;color:#117852;box-shadow:0 4px 15px rgba(0,0,0,.12);font-size:23px;line-height:1}
+html.ponte-inbox-v3 .jump-to-latest[hidden]{display:none!important}
+.topbar .top-actions{flex-shrink:0}
+.topbar .ponte-header-action{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:34px;padding:6px 10px;border:1px solid #e2ece6;border-radius:8px;color:#35735b;background:#f7fbf8;font-size:12px;font-weight:650;text-decoration:none;white-space:nowrap}
+.topbar .ponte-header-action:hover,.topbar .ponte-header-action:focus-visible{background:#e7f5ec;border-color:#a6cfba}
+.topbar .ponte-header-action svg{width:16px;height:16px;flex:none}
+.topbar .ponte-header-action.ponto-sair{color:#9b3e3e;background:#fff8f8;border-color:#f0dada}
+.topbar .ponte-header-action.ponto-sair:hover{background:#fff0f0}
+html.ponte-header-v3 .sidebar .help-card{display:none}
+html.ponte-header-v3 .sidebar .profile .logout{display:none}
+@media(max-width:760px){html.ponte-inbox-v3 .inbox-layout{grid-template-columns:minmax(0,1fr)!important;grid-template-rows:minmax(100px,30%) minmax(0,1fr)!important}html.ponte-inbox-v3 .inbox-list,html.ponte-inbox-v3 .chat-pane{height:100%}html.ponte-inbox-v3 .chat-pane{border-top:1px solid #edf1ed}html.ponte-inbox-v3 .jump-to-latest{right:12px;bottom:76px}.topbar .top-actions{gap:7px}.topbar .ponte-header-action{padding:6px 8px}}
+@media(max-width:440px){.topbar .ponte-header-action .ponte-action-label{display:none}.topbar .ponte-header-action{width:34px;padding:6px}}

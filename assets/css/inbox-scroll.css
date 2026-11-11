@@ -1,0 +1,16 @@
+/* Correção isolada da rolagem de mensagens do WhatsApp Gateway V1 */
+.inbox-layout{grid-template-rows:minmax(0,1fr)}
+.inbox-layout>.inbox-list,.inbox-layout>.chat-pane{min-height:0;min-width:0;max-height:100%;overflow:hidden}
+.inbox-layout>.inbox-list{display:flex;flex-direction:column}
+.inbox-layout .conversation-items{min-height:0;flex:1 1 0;overflow-y:auto}
+.inbox-layout>.chat-pane{position:relative;display:flex;flex-direction:column}
+.inbox-layout .chat-head,.inbox-layout .window-alert,.inbox-layout .composer,.inbox-layout .composer-hint,.inbox-layout .template-composer{flex-shrink:0}
+.inbox-layout #message-stream{flex:1 1 0px;min-height:0;height:0;max-height:none;overflow-y:scroll;overflow-x:hidden;overscroll-behavior-y:contain;scrollbar-width:thin;scrollbar-color:#86b5a0 #edf3ef;-webkit-overflow-scrolling:touch}
+.inbox-layout #message-stream::-webkit-scrollbar{width:10px}
+.inbox-layout #message-stream::-webkit-scrollbar-track{background:#edf3ef}
+.inbox-layout #message-stream::-webkit-scrollbar-thumb{background:#91bba6;border:2px solid #edf3ef;border-radius:10px}
+.inbox-layout #message-stream::-webkit-scrollbar-thumb:hover{background:#5b9879}
+.inbox-layout .jump-to-latest{position:absolute;right:22px;bottom:83px;z-index:5;width:38px;height:38px;display:grid;place-items:center;border:1px solid #badac8;border-radius:50%;color:#14714c;background:#fff;font-size:21px;box-shadow:0 5px 13px rgba(10,55,31,.14)}
+.inbox-layout .jump-to-latest[hidden]{display:none!important}
+.inbox-layout .jump-to-latest:hover{background:#e7f5ef}
+@media(max-width:760px){.inbox-layout .jump-to-latest{right:12px;bottom:78px}}

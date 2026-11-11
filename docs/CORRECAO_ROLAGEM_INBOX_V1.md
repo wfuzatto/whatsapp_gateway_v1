@@ -1,48 +1,64 @@
-# Hotfix V1 — Tela fixa, rolagem no histórico e Ajuda/Sair no cabeçalho (v3)
+# Correção definitiva de rolagem — Central de Conversas V1 (v4)
 
-## Motivação
+## Diagnóstico importante
 
-O upload dos arquivos CSS/JS por si só não ativa o JavaScript: a V1 usa `app/views/layout.php` como template global. A CSS anterior não limitava toda a cadeia de altura do painel.
+O fato de **Ajuda / Sair ainda não aparecerem no header** na imagem de produção indica que a revisão JavaScript anterior possivelmente **não foi carregada**. Enviar arquivos por FTP sem incluí-los no `layout.php` não ativa as mudanças.
 
-## Instalação segura no servidor
+A revisão v4 não depende apenas da cascata CSS: aplica por JS a altura do chat em pixels com base na altura disponível na janela. Preserva o histórico rolável e fixa o restante da página.
 
-1. Faça backup do `app/views/layout.php` da hospedagem atual.
-2. Atualize pelo FTP estes **dois** arquivos, sem trocar `app.css` ou `app.js`:
-   - `assets/css/inbox-scroll.css`
+## Arquivos alterados no repositório
+
+- `assets/js/inbox-scroll.js` — revisão v4.
+- `assets/css/inbox-scroll.css` — estilos de apoio da revisão v3, ainda reutilizados.
+
+## Instalação no servidor real
+
+1. Faça backup do arquivo `app/views/layout.php` **atual** e do JS/CSS já existentes na hospedagem.
+2. Atualize pelo FTP os arquivos:
    - `assets/js/inbox-scroll.js`
-3. Dentro do **layout.php atual do servidor**, adicione **depois** de `<script defer src="assets/js/app.js"></script>`:
+   - `assets/css/inbox-scroll.css`
+3. Em **`app/views/layout.php`**, dentro da região final de scripts, inclua a linha **uma única vez** (não apenas no `inbox.php`):
 
 ```html
-<script defer src="assets/js/inbox-scroll.js?v=20261111-3"></script>
+<script defer src="/sites/whatsapp_gateway/assets/js/inbox-scroll.js?v=20261111-4"></script>
 ```
 
-Se já existir inclusão do mesmo arquivo, atualize a querystring para `20261111-3`. Não substitua o layout por um arquivo antigo. O script é idempotente, mesmo que uma cópia antiga também esteja incluída em `app/views/pages/inbox.php`; é preferível remover a inclusão antiga dali.
+Se já houver uma linha apontando para esse mesmo arquivo, substitua-a pela linha acima. Mantenha a inclusão existente de `app.js`. Não copie uma versão antiga do layout.php sobre a versão de produção.
 
-4. Na Central de Conversas, pressione Ctrl+F5.
+4. Abra `https://prodatastelecom.com.br/sites/whatsapp_gateway/?r=inbox&id=3` e pressione Ctrl+Shift+R.
 
-## Resultado esperado
+## Diagnóstico no navegador (F12 > Console)
 
-- `/?r=inbox` ocupa toda a janela. **A página principal não rola.**
-- `#message-stream` tem rolagem vertical própria à direita. A lista de contatos rola à esquerda, separadamente.
-- Cabeçalho e campo de digitação permanecem visíveis.
-- Ao selecionar o chat, o histórico vai para a última mensagem. Enquanto o atendente lê mensagens antigas, não força o scroll: aparece uma seta ↓ para voltar ao fim.
-- **Ajuda** e **Sair** aparecem à direita dos botões de navegação no header, em todas as páginas que carregam o layout global, usando as mesmas URLs já existentes no menu lateral.
-
-## Verificação no Console (F12)
+Cole apenas estas linhas, que **não modificam dados nem enviam mensagens**:
 
 ```js
 ({
-  script: !!window.__ponteV1UiV3,
-  paginaFixa: document.documentElement.scrollHeight - document.documentElement.clientHeight,
-  historicoRolavel: document.querySelector('#message-stream')?.scrollHeight - document.querySelector('#message-stream')?.clientHeight,
-  botoes: [...document.querySelectorAll('.topbar [data-ponte-header-action]')].map(x=>x.textContent.trim())
+  scriptCarregado: window.__ponteV1ScrollStatus,
+  abaRolagem: document.documentElement.scrollHeight - document.documentElement.clientHeight,
+  rolagemChat: document.querySelector('#message-stream')?.scrollHeight - document.querySelector('#message-stream')?.clientHeight,
+  botoesTopo: [...document.querySelectorAll('.topbar .ponte-header-action')].map(el=>el.textContent.trim())
 })
 ```
 
-Esperado na inbox: `script: true`, `paginaFixa: 0`, `historicoRolavel > 0`, `botoes: ['Ajuda','Sair']`. Se `script:false`, reveja o layout.php e o cache.
+Esperado:
+- `scriptCarregado.loaded: true`;
+- `scriptCarregado.mounted: true`;
+- `abaRolagem: 0`;
+- `rolagemChat > 0` quando houver mensagens suficientes;
+- `botoesTopo` contém `Ajuda` e `Sair`.
 
-## Cuidados
+Se `scriptCarregado` estiver `undefined`, o problema é **inclusão do script, cache ou rota do arquivo**, e não mais CSS. Abra diretamente a URL do JS para conferir retorno HTTP 200 (JavaScript, não HTML ou redirecionamento).
 
-O GitHub da V1 **não contém o código-fonte PHP completo da versão atual em produção**. Por isso, não publicamos `layout.php` integralmente nem substituímos a versão de produção. Apenas assets de correção e instruções. Não altera V2, Graph API, banco ou webhook.
+## Política de rolagem
 
-Validado em Chromium com fixture derivado do HTML/CSS da V1, 75 mensagens e quatro resoluções. Necessita publicação no FTP para validar a instalação real.
+- A página principal da Inbox não rola.
+- O histórico `#message-stream` rola na própria caixa.
+- A lista de conversas rola separadamente.
+- Ao abrir conversa, vai à última mensagem.
+- Se o atendente subir no histórico, novas mensagens não interrompem leitura; a seta ↓ leva ao final.
+
+## Escopo e ressalvas
+
+O GitHub da V1 não contém o `layout.php` atualizado da hospedagem. Portanto, só os arquivos auxiliares foram modificados. A aplicação em produção depende de atualizar **o layout.php que já está no FTP**, sem substituí-lo por uma cópia antiga.
+
+Não modifica a V2, Android, webhook ou autenticação.

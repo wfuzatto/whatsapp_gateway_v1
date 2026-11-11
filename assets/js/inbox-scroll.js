@@ -3,7 +3,8 @@
   'use strict';
   if (window.__ponteV1UiV3) return; // Caso seja incluido no layout e no inbox.php.
   window.__ponteV1UiV3 = true;
-  const VERSION = '20261111-3';
+  window.__ponteV1ScrollStatus = {loaded:true,version:"v4",mounted:false,error:null};
+  const VERSION = '20261111-4';
   if (!document.querySelector('link[data-ponte-v1-ui-v3]')) {
     const link = document.createElement('link');
     link.rel = 'stylesheet';
@@ -42,9 +43,58 @@
     const pane = stream?.closest('.chat-pane');
     if (!stream || !layout || !pane) return;
     document.documentElement.classList.add('ponte-inbox-v3');
+    window.__ponteV1ScrollStatus.mounted=true;
     if (stream.dataset.ponteScrollV3) return;
     stream.dataset.ponteScrollV3 = '1';
 
+    // V4: impõe a altura disponível usando a posição real do painel na janela.
+    // Não depende somente da cascata flex/grid das folhas de estilo antigas.
+    const main = layout.closest('.main');
+    const content = layout.closest('.content');
+    const shell = document.querySelector('.app-shell');
+    if (!main || !content || !shell) {
+      window.__ponteV1ScrollStatus.error = 'Estrutura da página diferente da esperada';
+      return;
+    }
+    function applyFixedHeight() {
+      document.documentElement.style.setProperty('overflow', 'hidden', 'important');
+      document.body.style.setProperty('overflow', 'hidden', 'important');
+      shell.style.setProperty('position', 'fixed', 'important');
+      shell.style.setProperty('inset', '0', 'important');
+      shell.style.setProperty('height', '100dvh', 'important');
+      shell.style.setProperty('overflow', 'hidden', 'important');
+      main.style.setProperty('height', '100%', 'important');
+      main.style.setProperty('overflow', 'hidden', 'important');
+      content.style.setProperty('overflow', 'hidden', 'important');
+      const footer = main.querySelector('.footer');
+      const available = Math.max(160, window.innerHeight - layout.getBoundingClientRect().top - (footer?.getBoundingClientRect().height || 0) - 8);
+      layout.style.setProperty('height', available + 'px', 'important');
+      layout.style.setProperty('max-height', available + 'px', 'important');
+      layout.style.setProperty('overflow', 'hidden', 'important');
+      pane.style.setProperty('height', '100%', 'important');
+      pane.style.setProperty('display', 'flex', 'important');
+      pane.style.setProperty('flex-direction', 'column', 'important');
+      pane.style.setProperty('overflow', 'hidden', 'important');
+      let otherHeight = 0;
+      for (const child of pane.children) {
+        if (child === stream || child.classList.contains('jump-to-latest')) continue;
+        if (getComputedStyle(child).position === 'absolute') continue;
+        otherHeight += child.getBoundingClientRect().height;
+      }
+      const availableMessages = Math.max(60, pane.clientHeight - otherHeight);
+      stream.style.setProperty('height', availableMessages + 'px', 'important');
+      stream.style.setProperty('flex', '0 0 ' + availableMessages + 'px', 'important');
+      stream.style.setProperty('min-height', '0', 'important');
+      stream.style.setProperty('overflow-y', 'scroll', 'important');
+      window.__ponteV1ScrollStatus.metrics = {
+        documentScroll:document.documentElement.scrollHeight-document.documentElement.clientHeight,
+        chatScroll:stream.scrollHeight-stream.clientHeight,
+        chatHeight:availableMessages
+      };
+    }
+    applyFixedHeight();
+    window.addEventListener('resize', applyFixedHeight);
+    window.visualViewport?.addEventListener('resize', applyFixedHeight);
     let button = pane.querySelector('.jump-to-latest');
     if (!button) {
       button = document.createElement('button');
@@ -97,14 +147,14 @@
     };
     watch();
     if (typeof MutationObserver === 'function') {
-      new MutationObserver(() => { watch(); schedule(); })
+      new MutationObserver(() => { watch(); applyFixedHeight(); schedule(); })
         .observe(stream, { childList: true, subtree: true });
     }
     document.querySelector('link[data-ponte-v1-ui-v3]')
       ?.addEventListener('load', () => schedule(true), { once: true });
     schedule(true);
     window.addEventListener('load', () => schedule(true), { once: true });
-    window.addEventListener('resize', () => schedule());
+    window.addEventListener('resize', () => { applyFixedHeight(); schedule(); });
   }
 
   const start = () => { mountHeaderActions(); mountInbox(); };

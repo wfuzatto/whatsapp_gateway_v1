@@ -1,4 +1,4 @@
-# Configurações e segredos locais
+# Protege credenciais e chaves locais
 .env
 .env.*
 !.env.example
@@ -6,13 +6,19 @@ app/config.local.php
 app/config.php
 config.local.php
 config.php
-whatsapp_install_key.txt
+/storage/config.local.php
+/storage/config.local0.php
+/storage/config.local*.php
+!/storage/config.local.example.php
+/storage/*.log
+/storage/tmp/
+/whatsapp_install_key.txt
 *install_key*.txt
 *.pem
 *.key
 *.p12
 *.pfx
-# Cache, logs e temporários
+# Cache, logs e temporarios
 *.log
 *.tmp
 storage/logs/*

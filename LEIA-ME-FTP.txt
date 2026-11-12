@@ -1,0 +1,19 @@
+PACOTE FTP - WHATSAPP GATEWAY V1
+
+Extraia este ZIP no diretorio da aplicacao no servidor:
+  /sites/whatsapp_gateway/
+
+Substitua:
+  index.php
+  app/views/layout.php
+  app/views/pages/inbox.php
+  assets/css/app.css
+  assets/js/app.js
+
+Depois remova, se existirem, as camadas antigas de correcao:
+  assets/css/inbox-scroll.css
+  assets/js/inbox-scroll.js
+
+Preserve storage/, configuracao local, chave de instalacao, banco de dados,
+V2 e aplicativo Android. A Ajuda aponta para ?r=setup-meta. Sair usa POST
+com o token CSRF da sessao.

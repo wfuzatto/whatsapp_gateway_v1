@@ -9,7 +9,8 @@ header('Content-Type: text/html; charset=UTF-8');
 header('Cache-Control: no-store, private');
 header('X-Content-Type-Options: nosniff');
 header('Referrer-Policy: strict-origin-when-cross-origin');
-header("Content-Security-Policy: default-src 'none'; style-src 'nonce-npsteste'; script-src 'nonce-npsteste'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
+$styleNonce = base64_encode(random_bytes(18));
+header("Content-Security-Policy: default-src 'none'; style-src 'nonce-" . $styleNonce . "'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
 
 function escape_html(string $value): string {
     return htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
@@ -30,7 +31,7 @@ if ($method === 'POST') {
         $score = (int) $raw;
         // Comentário apenas para demonstração; não será salvo nem transmitido.
         $feedback = isset($_POST['comment']) && is_string($_POST['comment'])
-            ? mb_substr(trim($_POST['comment']), 0, 500, 'UTF-8')
+            ? (function_exists('mb_substr') ? mb_substr(trim($_POST['comment']), 0, 500, 'UTF-8') : substr(trim($_POST['comment']), 0, 500))
             : '';
         $classification = $score <= 6 ? 'Detrator' : ($score <= 8 ? 'Neutro' : 'Promotor');
         $submitted = true;
@@ -45,7 +46,7 @@ if ($method === 'POST') {
   <meta name="theme-color" content="#0d8064">
   <meta name="robots" content="noindex, nofollow, noarchive">
   <title>Pesquisa de satisfação | Ponte — teste</title>
-  <style nonce="npsteste">
+  <style nonce="<?= escape_html($styleNonce) ?>">
     :root { color-scheme:light; --green:#0d8064; --dark:#12332a; --muted:#5c6f68; --border:#d7e7de; --bg:#f2f7f4; --white:#fff; --mint:#e5f6ed; }
     * { box-sizing:border-box }
     body { margin:0; background:linear-gradient(145deg,#ecf8f0,#f6f9f7 57%,#f8fbf9);

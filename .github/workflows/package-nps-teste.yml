@@ -1,0 +1,41 @@
+name: Validar e empacotar teste NPS V1
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'nps-teste/**'
+      - '.github/workflows/package-nps-teste.yml'
+  workflow_dispatch:
+jobs:
+  build-nps:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validar sintaxe PHP
+        run: php -l nps-teste/index.php
+      - name: Testar GET e envio POST
+        shell: bash
+        run: |
+          set -euo pipefail
+          php -S 127.0.0.1:8123 -t . >/tmp/nps-php.log 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" || true' EXIT
+          for i in $(seq 1 15); do
+            if curl -fsS http://127.0.0.1:8123/nps-teste/ >/tmp/nps-get.html; then break; fi
+            sleep 1
+          done
+          grep -Fq 'Como foi sua experiência conosco?' /tmp/nps-get.html
+          curl -fsS -X POST -d 'score=8&comment=teste' http://127.0.0.1:8123/nps-teste/ >/tmp/nps-post.html
+          grep -Fq 'Obrigado pela participação!' /tmp/nps-post.html
+          grep -Fq 'Nota selecionada: 8/10' /tmp/nps-post.html
+      - name: Gerar ZIP
+        shell: bash
+        run: zip -qr nps_teste_whatsapp_gateway_v1.zip nps-teste
+      - name: Publicar artefato de instalação
+        uses: actions/upload-artifact@v4
+        with:
+          name: nps_teste_whatsapp_gateway_v1
+          path: nps_teste_whatsapp_gateway_v1.zip
+          if-no-files-found: error
